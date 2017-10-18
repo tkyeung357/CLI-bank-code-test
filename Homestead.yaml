@@ -1,0 +1,23 @@
+ip: 192.168.10.10
+memory: 2048
+cpus: 1
+provider: virtualbox
+authorize: ~/.ssh/id_rsa.pub
+keys:
+    - ~/.ssh/id_rsa
+folders:
+    -
+        map: /Users/timyeung/vagrant/worldfirst_test
+        to: /home/vagrant/code
+        type: "rsync"
+        options:
+            rsync__args: ["--verbose", "--archive", "--delete", "-zz"]
+            rsync__exclude: ["node_modules"]
+sites:
+    -
+        map: worldfirst.test
+        to: /home/vagrant/code/public
+databases:
+    - worldfirst
+name: worldfirst-test
+hostname: worldfirst-test

@@ -1,0 +1,12 @@
+{
+    "require": {
+        "symfony/console": "^3.3"
+    },
+    "require-dev": {
+        "laravel/homestead": "^6.5"
+    },
+    "autoload": {
+        "psr-4": {
+        }
+    }
+}
