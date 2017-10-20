@@ -11,33 +11,28 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Account\DB;
 
-class AccountOpenCommand extends Command 
+class AccountCloseCommand extends Command 
 {
     protected function configure() 
     {
-        $this->setName('Account:Open')
-                ->setDescription('Open Account command')
-                ->addArgument('email', InputArgument::REQUIRED, 'email address')
-                ->addArgument('first_name', InputArgument::REQUIRED, 'account first name')
-                ->addArgument('last_name', InputArgument::REQUIRED, 'account last name');
+        $this->setName('Account:Close')
+                ->setDescription('Close Account command')
+                ->addArgument('email', InputArgument::REQUIRED, 'email address');
     }
     protected function execute(InputInterface $input, OutputInterface $output) 
     {
         try {
             //get command parameter
             $email = $input->getArgument('email');
-            $firstName = $input->getArgument('first_name');
-            $lastName = $input->getArgument('last_name');
 
             //instance DB
             $db = new DB();
             $account = new Account();
 
             //open account
-            $stmt = $account->open($db, $email, $firstName, $lastName);
-
+            $info = $account->close($db, $email);
+                
             $output->writeln("Success");
-            return true;
         } catch (PDOException $e) {
             $output->writeln('Failed - ' . $e->getMessage());
             return false;

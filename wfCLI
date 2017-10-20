@@ -5,11 +5,15 @@
 require_once __DIR__.'/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
-use Account\AccountCommand;
+use Account\AccountInfoCommand;
+use Account\AccountOpenCommand;
+use Account\AccountCloseCommand;
 
 $application = new Application();
 
 // ... register commands
-$application->add(new AccountCommand());
+$application->add(new AccountInfoCommand());
+$application->add(new AccountOpenCommand());
+$application->add(new AccountCloseCommand());
 
 $application->run();
