@@ -14,11 +14,10 @@ class DB extends PDO {
         $this->username = 'homestead'; 
         $this->password = 'secret'; 
         $dns = 'mysql:dbname='.$this->database.";host=".$this->host; 
+        $options = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        );
 
-        parent::__construct( $dns, $this->username, $this->password); 
-    }
-
-    public function getConnection() {
-
+        parent::__construct( $dns, $this->username, $this->password, $options); 
     }
 }
