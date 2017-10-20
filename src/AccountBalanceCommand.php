@@ -12,12 +12,12 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Account\DB;
 
-class AccountInfoCommand extends Command 
+class AccountBalanceCommand extends Command 
 {
     protected function configure() 
     {
-        $this->setName('Account:Info')
-                ->setDescription('Display Account Info command')
+        $this->setName('Account:Balance')
+                ->setDescription('Display Account Balance command')
                 ->addArgument('email', InputArgument::REQUIRED, 'email address');
     }
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -31,12 +31,12 @@ class AccountInfoCommand extends Command
             $account = new Account();
 
             //open account
-            $info = $account->info($db, $email);
+            $balance = $account->balance($db, $email);
 
-            //display account info table
+            //display account balance table
             $table = new Table($output); 
-            $table->setHeaders(array('ID', 'Email', 'First Name', 'Last Name', 'Status'))
-                    ->setRows(array($info));
+            $table->setHeaders(array('Email', 'Balance'))
+                    ->setRows(array($balance));
             $table->render();
             
             $output->writeln("Success");

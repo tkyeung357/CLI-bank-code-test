@@ -11,13 +11,15 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Account\DB;
+use Account\Account;
+use Account\Transaction;
 
-class AccountInfoCommand extends Command 
+class AccountListTransactionCommand extends Command 
 {
     protected function configure() 
     {
-        $this->setName('Account:Info')
-                ->setDescription('Display Account Info command')
+        $this->setName('Account:ListTransaction')
+                ->setDescription('Deposit Account command')
                 ->addArgument('email', InputArgument::REQUIRED, 'email address');
     }
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -32,11 +34,13 @@ class AccountInfoCommand extends Command
 
             //open account
             $info = $account->info($db, $email);
+            $deposit = new Transaction($info);
+            $transactionList = $deposit->listTransaction($db);   
 
-            //display account info table
+            //display transaction list table
             $table = new Table($output); 
-            $table->setHeaders(array('ID', 'Email', 'First Name', 'Last Name', 'Status'))
-                    ->setRows(array($info));
+            $table->setHeaders(array('Transaction ID', 'Amount', 'Date', 'Type'))
+                    ->setRows($transactionList);
             $table->render();
             
             $output->writeln("Success");

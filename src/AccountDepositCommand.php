@@ -9,22 +9,25 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Helper\Table;
 use Account\DB;
+use Account\Account;
+use Account\Transaction;
 
-class AccountInfoCommand extends Command 
+class AccountDepositCommand extends Command 
 {
     protected function configure() 
     {
-        $this->setName('Account:Info')
-                ->setDescription('Display Account Info command')
-                ->addArgument('email', InputArgument::REQUIRED, 'email address');
+        $this->setName('Account:Deposit')
+                ->setDescription('Deposit Account command')
+                ->addArgument('email', InputArgument::REQUIRED, 'email address')
+                ->addArgument('amount', InputArgument::REQUIRED, 'transation amount');
     }
     protected function execute(InputInterface $input, OutputInterface $output) 
     {
         try {
             //get command parameter
             $email = $input->getArgument('email');
+            $amount = $input->getArgument('amount');
 
             //instance DB
             $db = new DB();
@@ -32,13 +35,9 @@ class AccountInfoCommand extends Command
 
             //open account
             $info = $account->info($db, $email);
+            $deposit = new Transaction($info);
+            $deposit->deposit($db, $amount);   
 
-            //display account info table
-            $table = new Table($output); 
-            $table->setHeaders(array('ID', 'Email', 'First Name', 'Last Name', 'Status'))
-                    ->setRows(array($info));
-            $table->render();
-            
             $output->writeln("Success");
         } catch (PDOException $e) {
             $output->writeln('Failed - ' . $e->getMessage());

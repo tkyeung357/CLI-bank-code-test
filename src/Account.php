@@ -3,6 +3,7 @@ namespace Account;
 
 use \Exception;
 use \PDOException;
+use \PDO;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Account\DB;
@@ -115,9 +116,6 @@ class Account
             $stmt->bindParam(':email', $email);
             $stmt->execute();
 
-            if (!$stmt->rowCount()) {
-                throw new Exception('The account status has not been updated');
-            }
             return true;
         } catch (PDOException $e) {
             //rethrow exception
@@ -127,6 +125,7 @@ class Account
             throw $e;
         }
     }
+
     /**
     * Delete account, delete account from system.
     */
@@ -148,9 +147,6 @@ class Account
             $stmt->bindParam(':email', $email);
             $stmt->execute();
 
-            if (!$stmt->rowCount()) {
-                throw new Exception('No data deleted.');
-            }
             return true;
         } catch (PDOException $e) {
             //rethrow exception
@@ -177,7 +173,7 @@ class Account
                 throw new Exception('The Email Address is in an invalid format.');
             }
             
-            $SQL = "SELECT id, email, first_name, last_name, status 
+            $SQL = "SELECT `id`, `email`, `first_name`, `last_name`, `status` 
                     FROM account
                     WHERE
                         email = :email;";
@@ -188,7 +184,49 @@ class Account
             if (!$stmt->rowCount()) {
                 throw new Exception('No data found.');
             }
-            return $stmt->fetchAll();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            //rethrow exception
+            throw $e;
+        } catch (Exception $e) {
+            //rethrow exception
+            throw $e;
+        }
+    }
+
+    /*
+    * return account balance
+    */
+    public function balance($db, $email) 
+    {
+        try {
+            //validate DB object
+            if (!$this->validateDBObj($db)) {
+                throw new Exception('Invalid DB obj.');
+            }
+
+            //validate email address format
+            if (!$this->validateAccountEmail($email)) {
+                throw new Exception('The Email Address is in an invalid format.');
+            }
+            
+            $SQL = "SELECT
+                        account.email,
+                        SUM( acct.transaction_amount ) AS balance
+                    FROM
+                        account
+                    JOIN account_transaction AS acct ON
+                        acct.account_id = account.id
+                    WHERE
+                        account.email = :email;";
+            $stmt = $db->prepare($SQL);
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+
+            if (!$stmt->rowCount()) {
+                throw new Exception('No data found.');
+            }
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             //rethrow exception
             throw $e;
