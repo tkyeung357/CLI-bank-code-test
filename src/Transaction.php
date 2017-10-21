@@ -60,11 +60,19 @@ class Transaction
     public function deposit($amount)
     {
         try {
-            $accountID = $this->account->getAccountID();
+            $account = $this->account->info();
+            $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+            $status = isset($account['status']) && !empty($account['status']) ? true : false;
+
+            if (!$status) {
+                //account closed
+                throw new Exception ('Account Closed.');
+            }
 
             if (!$accountID) {
                 throw new Exception('accountID missed.');
             }
+
             $SQL = "
                 INSERT INTO account_transaction(`account_id`, `transaction_amount`, `transaction_date`, `transaction_type`)
                     VALUES(:accountID, :amount, NOW(), 1);
@@ -88,11 +96,19 @@ class Transaction
     public function withdrawal($amount)
     {
         try {
-            $accountID = $this->account->getAccountID();
+            $account = $this->account->info();
+            $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+            $status = isset($account['status']) && !empty($account['status']) ? true : false;
+
+            if (!$status) {
+                //account closed
+                throw new Exception ('Account Closed.');
+            }
 
             if (!$accountID) {
                 throw new Exception('accountID missed.');
             }
+
             if (!is_numeric($amount)) {
                 throw new Exception('invalid amount.');
             }

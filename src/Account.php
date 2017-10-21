@@ -173,6 +173,15 @@ class Account
         return $accountID;
     }
 
+    // return account status,
+    // return null if account not found
+    public function status()
+    {
+        $account = $this->info();
+        $status = isset($account['status']) && !empty($account['status']) ? true : false;
+        return $status;
+    }
+
     /*
     * return account balance
     */
