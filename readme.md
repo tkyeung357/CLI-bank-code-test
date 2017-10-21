@@ -42,12 +42,28 @@
     - validate Email address
     - validate user name 
 - AccountCommandTest for test account command. (test/AccountCommandTest.php)
-    - Use Case: open account
-    - Use Case: close account
+    - Use Case: open account:
+        * Success case, open a test account
+        * Failed case, try to open an account with existing email
+        * Failed case, provide a invalid email.
     - Use Case: Deposit Account
+        * Success case, deposit 100 to test account
+        * Failed case, deposit "test amount" to test account
     - Use Case: Withdrawal Account
+        * Success case, withdraw 100 to test account
+        * Failed case: not enough money 
+        * Failed case, deposit a invalid amount "test amount" to test account
     - Use Case: List Account Transaction
+        * Success case
     - Use Case: Account Balance
+        *  Success case
+    - Use Case: close account
+        * Success case, update account status to 0 (disabled)
+        * Failed case, try to update a disabled account. no record udpated
+        * Failed case, deposit closed account
+        * Failed case, withdrawal closed account
+    - Use Case: reopen account
+        * Success case, update account status to 1 (enabled)
 
 ----
 ### DB Client Info: 
