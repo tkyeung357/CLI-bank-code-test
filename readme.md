@@ -16,14 +16,6 @@
     -     ./wfCLI 
 
 ----
-### DB Client Info: 
-- IP: 127.0.0.1
-- Port: 33060
-- Login: homestead
-- PW: secret
-- DB: wordfirst
-
-----
 ### Supported Command 
         /home/vagrant/code >./wfCLI Account:
 -  Account:Balance          : Display Account Balance command
@@ -37,8 +29,9 @@
 ----
 ### Not handled feature or use case:🙉
 - not handle overdraft facility
+- not handle CLI run on web browser
 - not handle concurrent transaction for withdrawal, so negative balance may happen.
-- not handle security/permission for CLI app
+- not handle security/permission control for CLI app
 - implemented delete function for auto test which is not necessary and risky in real world.
 
 ----
@@ -55,3 +48,11 @@
     - Use Case: Withdrawal Account
     - Use Case: List Account Transaction
     - Use Case: Account Balance
+
+----
+### DB Client Info: 
+- IP: 127.0.0.1
+- Port: 33060
+- Login: homestead
+- PW: secret
+- DB: wordfirst
