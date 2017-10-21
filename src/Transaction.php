@@ -4,21 +4,28 @@ namespace Account;
 use \Exception;
 use \PDOException;
 use \PDO;
+use Helper\Helper;
 
 class Transaction 
 {
     private $account = null;
+    private $db = null;
     
-    function __construct($account)
+    function __construct($db, $account)
     {
+        $helper = new Helper();
+        //validate DB object
+        if (!$helper->validateDBObj($db)) {
+            throw new Exception('Invalid DB obj.');
+        }
         $this->account = $account;
+        $this->db = $db;
     }
 
-    public function listTransaction($db)
+    public function listTransaction()
     {
         try {
-            $account = $this->account;
-            $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+            $accountID = $this->account->getAccountID();
 
             if (!$accountID) {
                 throw new Exception('accountID missed.');
@@ -37,7 +44,7 @@ class Transaction
                     acct.account_id = :accountID;
             ";
                     
-            $stmt = $db->prepare($SQL);
+            $stmt = $this->db->prepare($SQL);
             $stmt->bindParam(':accountID', $accountID);
             $stmt->execute();
 
@@ -50,11 +57,10 @@ class Transaction
             throw $e;
         }
     }
-    public function deposit($db, $amount)
+    public function deposit($amount)
     {
         try {
-            $account = $this->account;
-            $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+            $accountID = $this->account->getAccountID();
 
             if (!$accountID) {
                 throw new Exception('accountID missed.');
@@ -64,7 +70,7 @@ class Transaction
                     VALUES(:accountID, :amount, NOW(), 1);
             ";
                     
-            $stmt = $db->prepare($SQL);
+            $stmt = $this->db->prepare($SQL);
             $stmt->bindParam(':accountID', $accountID);
             $stmt->bindParam(':amount', $amount);
             $stmt->execute();
@@ -79,11 +85,10 @@ class Transaction
         }
     }
 
-    public function withdrawal($db, $amount)
+    public function withdrawal($amount)
     {
         try {
-            $account = $this->account;
-            $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+            $accountID = $this->account->getAccountID();
 
             if (!$accountID) {
                 throw new Exception('accountID missed.');
@@ -91,13 +96,20 @@ class Transaction
             if (!is_numeric($amount)) {
                 throw new Exception('invalid amount.');
             }
+
+            $currentBalance = $this->account->balance();
+            if ($currentBalance['balance'] < $amount) {
+                //no enough money and throw exception
+                throw new Exception ('Not enough money');
+            }
+
             $SQL = "
                 INSERT INTO account_transaction(`account_id`, `transaction_amount`, `transaction_date`, `transaction_type`)
                     VALUES(:accountID, :amount, NOW(), 2);
             ";
                     
             $amount = abs($amount) * -1;
-            $stmt = $db->prepare($SQL);
+            $stmt = $this->db->prepare($SQL);
             $stmt->bindParam(':accountID', $accountID);
             $stmt->bindParam(':amount', $amount);
             $stmt->execute();

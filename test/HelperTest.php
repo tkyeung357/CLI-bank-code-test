@@ -1,13 +1,13 @@
 <?php
 namespace Tests;
 
-use Account\Account;
+use Helper\Helper;
 use Account\DB;
 use PHPUnit\Framework\TestCase;
 
 require_once './vendor/autoload.php';
 
-class AccountTest extends TestCase {
+class HelperTest extends TestCase {
 
     /*
     * Validator Test: DB object
@@ -16,12 +16,12 @@ class AccountTest extends TestCase {
     */
     public function testDBObj() 
     {
-        $account = new Account();
         $db = new DB();
+        $helper = new Helper();
         //success case test, pass PDO object
-        $this->assertTrue($account->validateDBObj($db));
+        $this->assertTrue($helper->validateDBObj($db));
         //failed case test, pass null
-        $this->assertFalse($account->validateDBObj(null));
+        $this->assertFalse($helper->validateDBObj(null));
     }
 
     /*
@@ -31,11 +31,11 @@ class AccountTest extends TestCase {
     */
     public function testEmailValidator() 
     {
-        $account = new Account();
+        $helper = new Helper();
         //success case test
-        $this->assertTrue($account->validateAccountEmail('timmy.timki@gmail.com'));
+        $this->assertTrue($helper->validateAccountEmail('timmy.timki@gmail.com'));
         //fail case test: invalid email format. remove @
-        $this->assertFalse($account->validateAccountEmail('timmy.timki-at-gmail.com'));
+        $this->assertFalse($helper->validateAccountEmail('timmy.timki-at-gmail.com'));
     }
 
     /* 
@@ -47,14 +47,14 @@ class AccountTest extends TestCase {
     */
     public function testNameValidator() 
     {
-        $account = new Account();
+        $helper = new Helper();
         //success case test
-        $this->assertTrue($account->validateAccountName('Tim'));
+        $this->assertTrue($helper->validateAccountName('Tim'));
         //success case test: max 30 character. 26(a-z)+4(aabb)
-        $this->assertTrue($account->validateAccountName('abcdefghijklmnopqrstuvwxyzaabb'));
+        $this->assertTrue($helper->validateAccountName('abcdefghijklmnopqrstuvwxyzaabb'));
         //fail case test: invalid name format
-        $this->assertFalse($account->validateAccountName('timmy.timki'));
+        $this->assertFalse($helper->validateAccountName('timmy.timki'));
         //fail case test: max character reached. 26(a-z)+6(aabbcc)
-        $this->assertFalse($account->validateAccountName('abcdefghijklmnopqrstuvwxyzaabbcc'));
+        $this->assertFalse($helper->validateAccountName('abcdefghijklmnopqrstuvwxyzaabbcc'));
     }
 }

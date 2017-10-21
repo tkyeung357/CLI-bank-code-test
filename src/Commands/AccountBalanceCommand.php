@@ -1,5 +1,5 @@
 <?php
-namespace Account;
+namespace Account\Commands;
 
 use \Exception;
 use \PDOException;
@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Account\DB;
+use Account\Account;
 
 class AccountBalanceCommand extends Command 
 {
@@ -28,10 +29,10 @@ class AccountBalanceCommand extends Command
 
             //instance DB
             $db = new DB();
-            $account = new Account();
+            $account = new Account($db, $email);
 
-            //open account
-            $balance = $account->balance($db, $email);
+            //get account balance
+            $balance = $account->balance();
 
             //display account balance table
             $table = new Table($output); 

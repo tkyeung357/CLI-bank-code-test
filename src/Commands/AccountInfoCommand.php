@@ -1,5 +1,5 @@
 <?php
-namespace Account;
+namespace Account\Commands;
 
 use \Exception;
 use \PDOException;
@@ -9,35 +9,37 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Helper\Table;
 use Account\DB;
 use Account\Account;
-use Account\Transaction;
 
-class AccountDepositCommand extends Command 
+class AccountInfoCommand extends Command 
 {
     protected function configure() 
     {
-        $this->setName('Account:Deposit')
-                ->setDescription('Deposit Account command')
-                ->addArgument('email', InputArgument::REQUIRED, 'email address')
-                ->addArgument('amount', InputArgument::REQUIRED, 'transation amount');
+        $this->setName('Account:Info')
+                ->setDescription('Display Account Info command')
+                ->addArgument('email', InputArgument::REQUIRED, 'email address');
     }
     protected function execute(InputInterface $input, OutputInterface $output) 
     {
         try {
             //get command parameter
             $email = $input->getArgument('email');
-            $amount = $input->getArgument('amount');
 
             //instance DB
             $db = new DB();
-            $account = new Account();
+            $account = new Account($db, $email);
 
             //open account
-            $info = $account->info($db, $email);
-            $deposit = new Transaction($info);
-            $deposit->deposit($db, $amount);   
+            $info = $account->info();
 
+            //display account info table
+            $table = new Table($output); 
+            $table->setHeaders(array('ID', 'Email', 'First Name', 'Last Name', 'Status'))
+                    ->setRows(array($info));
+            $table->render();
+            
             $output->writeln("Success");
         } catch (PDOException $e) {
             $output->writeln('Failed - ' . $e->getMessage());

@@ -3,12 +3,12 @@ namespace Tests;
 
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Account\AccountOpenCommand;
-use Account\AccountCloseCommand;
-use Account\AccountDepositCommand;
-use Account\AccountWithdrawalCommand;
-use Account\AccountListTransactionCommand;
-use Account\AccountBalanceCommand;
+use Account\Commands\AccountOpenCommand;
+use Account\Commands\AccountCloseCommand;
+use Account\Commands\AccountDepositCommand;
+use Account\Commands\AccountWithdrawalCommand;
+use Account\Commands\AccountListTransactionCommand;
+use Account\Commands\AccountBalanceCommand;
 use Account\Account;
 use Account\DB;
 
@@ -40,7 +40,8 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
     * Use Case: Withdrawal Account
     *   Test Case:
     *   - Success case, withdraw 100 to test account
-    *   - Failed case, deposit "test amount" to test account
+    *   - Failed case: not enough money 
+    *   - Failed case, deposit a invalid amount "test amount" to test account
     *
     * Use Case: List Transaction
     *   Test Case:
@@ -53,9 +54,9 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
     public function testOpenAccount() {
         //delete the test email from system for testing
         $db = new DB();
-        $account = new Account();
         $testEmail = 'timmy.timki@gmail.com';
-        $account->delete($db, $testEmail);
+        $account = new Account($db, $testEmail);
+        $account->delete();
 
         $app = new Application();
         $app->add(new AccountOpenCommand);
@@ -163,7 +164,16 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertRegExp('/Success/', $commandTester->getDisplay());
 
-        //failed test case 
+        //failed test case: not enough money 
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail,
+            'amount' => 100
+        ));
+
+        $this->assertRegExp('/Failed/', $commandTester->getDisplay());
+
+        //failed test case, invalid amount 
         $commandTester->execute(array(
             'command' => $command->getName(),
             'email' => $testEmail,

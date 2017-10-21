@@ -4,44 +4,52 @@ namespace Account;
 use \Exception;
 use \PDOException;
 use \PDO;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Account\DB;
+use Helper\Helper;
 
 class Account 
 {
+    private $db = null;
+    private $email = null;
 
+    function __construct($db, $email)
+    {
+        $helper = new Helper();
+        //validate DB object
+        if (!$helper->validateDBObj($db)) {
+            throw new Exception('Invalid DB obj.');
+        }
+
+        //validate email address format
+        if (!$helper->validateAccountEmail($email)) {
+            throw new Exception('The Email Address is in an invalid format.');
+        }
+
+        $this->db = $db;
+        $this->email = $email;
+    }
     /**
     * Open account
     */
-    public function open($db, $email, $firstName, $lastName) 
+    public function open($firstName, $lastName) 
     {
         try {
+            $helper = new Helper();
 
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
-            
             //validate first name
-            if (!$this->validateAccountName($firstName)) {
+            if (!$helper->validateAccountName($firstName)) {
                 throw new Exception('First name is invalid or max length of character reached(30).');
             }
 
             //validate last name
-            if (!$this->validateAccountName($lastName)) {
+            if (!$helper->validateAccountName($lastName)) {
                 throw new Exception('Last name is invalid or max length of character reached(30).');
             }
 
             $SQL = "INSERT INTO account(`email`, `first_name`, `last_name`)
                         VALUES(:email, :first_name, :last_name);";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->bindParam(':first_name', $firstName);
             $stmt->bindParam(':last_name', $lastName);
             $stmt->execute();
@@ -62,23 +70,14 @@ class Account
     /**
     * Close account, disable an enabled account
     */
-    public function close($db, $email) 
+    public function close() 
     {
         try {
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
             
             //upate account status
             $SQL = "UPDATE account SET status = 0 WHERE status = 1 AND email = :email;";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->execute();
 
             if (!$stmt->rowCount()) {
@@ -97,23 +96,13 @@ class Account
     /**
     * Reopen account, enable an disabled account
     */
-    public function reopen($db, $email) 
+    public function reopen() 
     {
         try {
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
-            
             //upate account status
             $SQL = "UPDATE account SET status = 1 WHERE status = 0 AND email = :email;";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->execute();
 
             return true;
@@ -129,22 +118,12 @@ class Account
     /**
     * Delete account, delete account from system.
     */
-    public function delete($db, $email) 
+    public function delete() 
     {
         try {
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
-            
             $SQL = "DELETE FROM account WHERE email = :email;";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->execute();
 
             return true;
@@ -160,25 +139,15 @@ class Account
     /*
     * return account info
     */
-    public function info($db, $email) 
+    public function info() 
     {
         try {
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
-            
             $SQL = "SELECT `id`, `email`, `first_name`, `last_name`, `status` 
                     FROM account
                     WHERE
                         email = :email;";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->execute();
 
             if (!$stmt->rowCount()) {
@@ -194,22 +163,22 @@ class Account
         }
     }
 
+    // return account ID,
+    // return null if account not found
+    public function getAccountID()
+    {
+
+        $account = $this->info();
+        $accountID = isset($account['id']) && !empty($account['id']) ? $account['id'] : null;
+        return $accountID;
+    }
+
     /*
     * return account balance
     */
-    public function balance($db, $email) 
+    public function balance() 
     {
         try {
-            //validate DB object
-            if (!$this->validateDBObj($db)) {
-                throw new Exception('Invalid DB obj.');
-            }
-
-            //validate email address format
-            if (!$this->validateAccountEmail($email)) {
-                throw new Exception('The Email Address is in an invalid format.');
-            }
-            
             $SQL = "SELECT
                         account.email,
                         SUM( acct.transaction_amount ) AS balance
@@ -219,8 +188,8 @@ class Account
                         acct.account_id = account.id
                     WHERE
                         account.email = :email;";
-            $stmt = $db->prepare($SQL);
-            $stmt->bindParam(':email', $email);
+            $stmt = $this->db->prepare($SQL);
+            $stmt->bindParam(':email', $this->email);
             $stmt->execute();
 
             if (!$stmt->rowCount()) {
@@ -234,41 +203,5 @@ class Account
             //rethrow exception
             throw $e;
         }
-    }
-
-    /*
-    * validate email address format
-    */
-    public function validateAccountEmail($email)
-    {
-        //intace email validator
-        $emailConstraint = new EmailConstraint();
-        $validator = Validation::createValidator();
-        $emailValidateResult = $validator->validate(
-            $email,
-            $emailConstraint
-        );
-
-        //return result
-        return count($emailValidateResult)? false : true;
-    }
-
-    /** 
-     * validate account name by regex
-     * - support AZ character 
-     * - support max 30 character
-    */
-    public function validateAccountName($name)
-    {
-        $regexValidator = "/^[a-zA-Z'-]{1,30}$/";
-        return preg_match($regexValidator, $name)? true : false;
-    }
-
-    /**
-    * validate DB object is instace of PDO
-    */
-    public function validateDBObj($db)
-    {
-       return $db instanceof \PDO;
     }
 }

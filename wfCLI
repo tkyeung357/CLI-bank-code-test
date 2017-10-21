@@ -5,13 +5,13 @@
 require_once __DIR__.'/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
-use Account\AccountInfoCommand;
-use Account\AccountOpenCommand;
-use Account\AccountCloseCommand;
-use Account\AccountDepositCommand;
-use Account\AccountWithdrawalCommand;
-use Account\AccountListTransactionCommand;
-use Account\AccountBalanceCommand;
+use Account\Commands\AccountInfoCommand;
+use Account\Commands\AccountOpenCommand;
+use Account\Commands\AccountCloseCommand;
+use Account\Commands\AccountDepositCommand;
+use Account\Commands\AccountWithdrawalCommand;
+use Account\Commands\AccountListTransactionCommand;
+use Account\Commands\AccountBalanceCommand;
 
 $application = new Application();
 
