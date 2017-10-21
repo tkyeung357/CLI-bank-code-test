@@ -9,6 +9,7 @@ use Account\Commands\AccountDepositCommand;
 use Account\Commands\AccountWithdrawalCommand;
 use Account\Commands\AccountListTransactionCommand;
 use Account\Commands\AccountBalanceCommand;
+use Account\Commands\AccountReopenCommand;
 use Account\Account;
 use Account\DB;
 
@@ -24,13 +25,6 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
     *   - Success case, open a test account 
     *   - Failed case, try to open an account with existing email
     *   - Failed case, provide a invalid email.
-    *
-    * Use Case: close account 
-    *   Test Case:
-    *   - Success case, update account status to 0 (disabled)
-    *   - Failed case, try to update a disabled account. no record udpated
-    *
-    * Test Preparation: Reopen closed account - call account reopen function to update account status to 1 (enabled)
     *
     * Use Case: Deposit Account
     *   Test Case:
@@ -50,6 +44,17 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
     * Use Case: Balance 
     *   Test Case:
     *   - Success case
+    *
+    * Use Case: close account 
+    *   Test Case:
+    *   - Success case, update account status to 0 (disabled)
+    *   - Failed case, try to update a disabled account. no record udpated
+    *   - Failed case, try to deposit a closed account.
+    *   - Failed case, try to withdraw a closed account.
+    *
+    * Use Case: reopen account 
+    *   Test Case:
+    *   - Success case, update account status to 1 (enabled)
     */
     public function testOpenAccount() {
         //delete the test email from system for testing
@@ -65,6 +70,7 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
         $app->add(new AccountWithdrawalCommand);
         $app->add(new AccountListTransactionCommand);
         $app->add(new AccountBalanceCommand);
+        $app->add(new AccountReopenCommand);
 
         //Use Case: Open account
         $command = $app->find('Account:Open');
@@ -103,30 +109,6 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
         ));
 
         $this->assertRegExp('/Failed/', $commandTester->getDisplay());
-
-        //Use Case: Close Account
-        $command = $app->find('Account:Close');
-        $commandTester = new CommandTester($command);
-
-        //success test case 
-        $commandTester->execute(array(
-            'command' => $command->getName(),
-            'email' => $testEmail
-        ));
-
-        $this->assertRegExp('/Success/', $commandTester->getDisplay());
-
-        //fail test case, close a disabled account
-        $commandTester->execute(array(
-            'command' => $command->getName(),
-            'email' => $testEmail
-        ));
-
-        $this->assertRegExp('/Failed/', $commandTester->getDisplay());
-
-        //reopen closed account
-        $account->reopen($db, $testEmail);
-
 
         //Use Case: Deposit Account
         $command = $app->find('Account:Deposit');
@@ -196,6 +178,64 @@ class AccountCommandTest extends \PHPUnit_Framework_TestCase {
 
         //Use Case: Balance 
         $command = $app->find('Account:Balance');
+        $commandTester = new CommandTester($command);
+
+        //success test case 
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail
+        ));
+
+        $this->assertRegExp('/Success/', $commandTester->getDisplay());
+
+        //Use Case: Close Account
+        $command = $app->find('Account:Close');
+        $commandTester = new CommandTester($command);
+
+        //success test case 
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail
+        ));
+
+        $this->assertRegExp('/Success/', $commandTester->getDisplay());
+
+        //fail test case, close a disabled account
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail
+        ));
+
+        $this->assertRegExp('/Failed/', $commandTester->getDisplay());
+
+        //failed test case, deposit a closed account
+        $command = $app->find('Account:Deposit');
+        $commandTester = new CommandTester($command);
+
+        //success test case 
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail,
+            'amount' => 100
+        ));
+        
+        $this->assertRegExp('/Failed/', $commandTester->getDisplay());
+       
+        //withdraw a closed account
+        $command = $app->find('Account:Withdrawal');
+        $commandTester = new CommandTester($command);
+
+        //failed test case, withdraw a closed account
+        $commandTester->execute(array(
+            'command' => $command->getName(),
+            'email' => $testEmail,
+            'amount' => 100
+        ));
+
+        $this->assertRegExp('/Failed/', $commandTester->getDisplay());
+
+        //Use Case: Reopen Account
+        $command = $app->find('Account:Reopen');
         $commandTester = new CommandTester($command);
 
         //success test case 

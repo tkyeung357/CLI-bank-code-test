@@ -12,10 +12,11 @@ use Account\Commands\AccountDepositCommand;
 use Account\Commands\AccountWithdrawalCommand;
 use Account\Commands\AccountListTransactionCommand;
 use Account\Commands\AccountBalanceCommand;
+use Account\Commands\AccountReopenCommand;
 
 $application = new Application();
 
-// ... register commands
+// register commands
 $application->add(new AccountInfoCommand());
 $application->add(new AccountOpenCommand());
 $application->add(new AccountCloseCommand());
@@ -23,5 +24,6 @@ $application->add(new AccountDepositCommand());
 $application->add(new AccountWithdrawalCommand());
 $application->add(new AccountListTransactionCommand());
 $application->add(new AccountBalanceCommand());
+$application->add(new AccountReopenCommand());
 
 $application->run();
