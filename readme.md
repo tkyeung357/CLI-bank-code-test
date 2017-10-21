@@ -1,5 +1,6 @@
 ### Install and How to use
-- install vagrant and composer
+- install virtualbox, vagrant and composer
+- make sure virtual machine name "worldfirst-test" not existed
 - unzip worldfirst_test_archive 
 - open terminal / iterm and go to worldfirst_test_archive directory
 - execute command:    
@@ -28,6 +29,8 @@
 
 ----
 ### Not handled feature or use case:🙉
+- not handle currency
+- not consider performance for large scale data
 - not handle overdraft facility
 - not handle CLI run on web browser
 - not handle concurrent transaction for withdrawal, so negative balance may happen.
@@ -72,3 +75,5 @@
 - Login: homestead
 - PW: secret
 - DB: wordfirst
+- ERD: root directy/ERD.png
+
