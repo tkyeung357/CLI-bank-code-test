@@ -1,4 +1,3 @@
-
 ### Install and How to use
 - install vagrant and composer
 - unzip worldfirst_test_archive 
